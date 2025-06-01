@@ -1,6 +1,6 @@
 import json
 
-def extract_and_indent(json_file_path, indent_size=4):
+class PDF2MindMapper():
     """
     Extracts text from a Docling-like JSON file and indents it based on the 'left' coordinate.
     Handles nested bullet points by increasing indentation levels.
@@ -12,59 +12,65 @@ def extract_and_indent(json_file_path, indent_size=4):
     Returns:
         str: A string with the extracted and indented text.  Returns an error message if the file can't be opened or parsed.
     """
-    try:
-        with open(json_file_path, 'r', encoding='utf-8') as f:  # Important: Specify encoding
-            data = json.load(f)
-    except FileNotFoundError:
-        return f"Error: File not found at {json_file_path}"
-    except json.JSONDecodeError:
-        return f"Error: Invalid JSON format in {json_file_path}"
+    def __init__(self, json_file_path, indent_size=4):
+        self.json_file_path = json_file_path
+        self.indentSize = indent_size
+        self.output = ""
+        self.previous_left = 0  # Keep track of the previous left coordinate
+        self.indent_level = 0 # The current indentation level
+        self.indentSize = 1   # The number of spaces to indent each level. 
 
-    output = ""
-    previous_left = 0  # Keep track of the previous left coordinate
-    indent_level = 0
+    def openPDF(self):
+            try:
+                with open(self.json_file_path, 'r', encoding='utf-8') as f:  # Important: Specify encoding
+                    self.data = json.load(f)
+            except FileNotFoundError:
+                return f"Error: File not found at {self.json_file_path}"
+            except json.JSONDecodeError:
+                return f"Error: Invalid JSON format in {self.json_file_path}"
+    
+    def extractIndentLevel(self):
+        # TODO: Implement this
+        return
 
-    def process_element(element):
-        nonlocal output, indent_level, previous_left  # Access outer scope variables
-        text_items = element['texts']
+    def process(self):
+        text_items = self.data['texts']
 
         for element in text_items:
             current_text = element['text'].strip()
             # Determine indentation level based on left coordinate
-            current_left = element['prov'][0]['bbox']['l']
+            self.current_left = element['prov'][0]['bbox']['l']
             # Skip empty text items and bullet points that are not nested
-            if len(current_text) == 0 or current_text== 'https://www.DionTraining.com' or current_text == 'CompTIA Network+ (N10-009) (Study Notes)' or current_left > 500:
+            if len(self.current_text) == 0 or self.current_text== 'https://www.DionTraining.com' or self.current_text == 'CompTIA Network+ (N10-009) (Study Notes)' or self.current_left > 500:
                 continue
 
             # Determine indentation level based on left coordinate
-            if current_left > previous_left:
-                indent_level += 1   # Increase indent for nested items
-            elif current_left < previous_left:
-                indent_level -= 1 # Decrease indent, but not below 0
+            if self.current_left > self.previous_left:
+                self.indent_level += 1   # Increase indent for nested items
+            elif self.current_left < self.previous_left:
+                self.indent_level -= 1 # Decrease indent, but not below 0
 
-            indentation = " " * (indent_level * indent_size)
-            output += f"{indentation}{current_text}\n"
-            previous_left = current_left
+            indentation = " " * (self.indent_level * self.indent_size)
+            self.output += f"{indentation}{current_text}\n"
+            self.previous_left = self.current_left
+        return self.output
 
-    process_element(data)  # Start processing the root of the document
-    return output
+    # Print to console
+    def printToConsole(self):
+        print(self.output)
+
+    def saveToFile(self, file_path, indented_text):
+        try:
+            with open(file_path, "w", encoding="utf-8") as outfile:
+                outfile.write(indented_text)
+        except:
+            print("Error saving file.")
 
 
 
 # Example Usage:
 file_path = "/home/chris/Documents/Udemy/CompTIA-Network/studyguide1-50.json"  # Replace with your file path
-indented_text = extract_and_indent(file_path)
-
-if "Error" in indented_text:
-    print(indented_text)  # Print the error message
-else:
-    print(indented_text)
-
-
-# Optionally save the output to a file
-def saveToFile(file_path, indented_text):
-    try:
-        with open(file_path, "w", encoding="utf-8") as outfile:
-            outfile.write(indented_text)
-    except:
-        print("Error saving file.")
+pdf2map = PDF2MindMapper(file_path)
+pdf2map.openPDF()
+pdf2map.process()
+pdf2map.printToConsole()
