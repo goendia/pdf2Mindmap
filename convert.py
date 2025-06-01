@@ -24,12 +24,12 @@ class PDF2MindMapper():
 
     def openPDF(self):
             try:
-                with open(self.json_file_path, 'r', encoding='utf-8') as f:  # Important: Specify encoding
+                with open(self.jsonFilePath, 'r', encoding='utf-8') as f:  # Important: Specify encoding
                     self.data = json.load(f)
             except FileNotFoundError:
-                return f"Error: File not found at {self.json_file_path}"
+                return f"Error: File not found at {self.jsonFilePath}"
             except json.JSONDecodeError:
-                return f"Error: Invalid JSON format in {self.json_file_path}"
+                return f"Error: Invalid JSON format in {self.jsonFilePath}"
     
     def extractIndentLevel(self):
         # TODO: Implement this
