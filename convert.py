@@ -31,7 +31,19 @@ class PDF2MindMapper():
             except json.JSONDecodeError:
                 return f"Error: Invalid JSON format in {self.jsonFilePath}"
     
-    def extractIndentLevel(self):
+    def extractIndentLevels(self):
+        # TODO: Implement this
+        listOfIndentLevels = []
+        for element in self.data['texts']:
+            currentLeft = element['prov'][0]['bbox']['l']
+            if currentLeft in listOfIndentLevels:
+                continue
+            else:
+                listOfIndentLevels.append(currentLeft)
+        listOfIndentLevels.sort()
+        return listOfIndentLevels
+
+    def extractIndentedText(self):
         # TODO: Implement this
         return
     
@@ -80,3 +92,4 @@ pdf2map = PDF2MindMapper(file_path)
 pdf2map.openPDF()
 pdf2map.process()
 pdf2map.printToConsole()
+print(pdf2map.extractIndentLevels())
