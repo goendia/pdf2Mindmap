@@ -33,15 +33,15 @@ class PDF2MindMapper():
     
     def extractIndentLevels(self):
         # TODO: Implement this
-        listOfIndentLevels = []
+        listOfIndentLevels = {}
         for element in self.data['texts']:
             currentLeft = element['prov'][0]['bbox']['l']
             if currentLeft in listOfIndentLevels:
-                continue
+                listOfIndentLevels[currentLeft] += 1
             else:
-                listOfIndentLevels.append(currentLeft)
-        listOfIndentLevels.sort()
-        return listOfIndentLevels
+                listOfIndentLevels[currentLeft] = 1
+        sortedlistOfIndentLevels = dict(sorted(listOfIndentLevels.items()))
+        return sortedlistOfIndentLevels
 
     def extractIndentedText(self):
         # TODO: Implement this
