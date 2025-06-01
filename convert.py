@@ -19,6 +19,7 @@ class PDF2MindMapper():
         self.previous_left = 0  # Keep track of the previous left coordinate
         self.indent_level = 0 # The current indentation level
         self.indentSize = 1   # The number of spaces to indent each level. 
+        self.currentText = ""
 
     def openPDF(self):
             try:
@@ -37,7 +38,7 @@ class PDF2MindMapper():
         text_items = self.data['texts']
 
         for element in text_items:
-            current_text = element['text'].strip()
+            self.current_text = element['text'].strip()
             # Determine indentation level based on left coordinate
             self.current_left = element['prov'][0]['bbox']['l']
             # Skip empty text items and bullet points that are not nested
@@ -50,8 +51,8 @@ class PDF2MindMapper():
             elif self.current_left < self.previous_left:
                 self.indent_level -= 1 # Decrease indent, but not below 0
 
-            indentation = " " * (self.indent_level * self.indent_size)
-            self.output += f"{indentation}{current_text}\n"
+            indentation = " " * (self.indent_level * self.indentSize)
+            self.output += f"{indentation}{self.current_text}\n"
             self.previous_left = self.current_left
         return self.output
 
