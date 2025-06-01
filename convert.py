@@ -12,12 +12,13 @@ class PDF2MindMapper():
     Returns:
         str: A string with the extracted and indented text.  Returns an error message if the file can't be opened or parsed.
     """
-    def __init__(self, json_file_path, indent_size=4):
-        self.json_file_path = json_file_path
-        self.indentSize = indent_size
+    def __init__(self, jsonFilePath, indentSize=4):
+        self.jsonFilePath = jsonFilePath
+        self.indentSize = indentSize
+        self.data = {}   # The JSON data
         self.output = ""
-        self.previous_left = 0  # Keep track of the previous left coordinate
-        self.indent_level = 0 # The current indentation level
+        self.previousLeft = 0  # Keep track of the previous left coordinate
+        self.indentLevel = 0 # The current indentation level
         self.indentSize = 1   # The number of spaces to indent each level. 
         self.currentText = ""
 
@@ -33,27 +34,31 @@ class PDF2MindMapper():
     def extractIndentLevel(self):
         # TODO: Implement this
         return
+    
+    def filterContent(self):
+        # Filter unneeded data like page numbers, header data, footing, etc
+        return
 
     def process(self):
         text_items = self.data['texts']
 
         for element in text_items:
-            self.current_text = element['text'].strip()
+            self.currentText = element['text'].strip()
             # Determine indentation level based on left coordinate
-            self.current_left = element['prov'][0]['bbox']['l']
+            self.currentLeft = element['prov'][0]['bbox']['l']
             # Skip empty text items and bullet points that are not nested
-            if len(self.current_text) == 0 or self.current_text== 'https://www.DionTraining.com' or self.current_text == 'CompTIA Network+ (N10-009) (Study Notes)' or self.current_left > 500:
+            if len(self.currentText) == 0 or self.currentText== 'https://www.DionTraining.com' or self.currentText == 'CompTIA Network+ (N10-009) (Study Notes)' or self.currentLeft > 500:
                 continue
 
             # Determine indentation level based on left coordinate
-            if self.current_left > self.previous_left:
-                self.indent_level += 1   # Increase indent for nested items
-            elif self.current_left < self.previous_left:
-                self.indent_level -= 1 # Decrease indent, but not below 0
+            if self.currentLeft > self.previousLeft:
+                self.indentLevel += 1   # Increase indent for nested items
+            elif self.currentLeft < self.previousLeft:
+                self.indentLevel -= 1 # Decrease indent, but not below 0
 
-            indentation = " " * (self.indent_level * self.indentSize)
-            self.output += f"{indentation}{self.current_text}\n"
-            self.previous_left = self.current_left
+            indentation = " " * (self.indentLevel * self.indentSize)
+            self.output += f"{indentation}{self.currentText}\n"
+            self.previousLeft = self.currentLeft
         return self.output
 
     # Print to console
