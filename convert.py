@@ -1,4 +1,6 @@
 import json
+# from docling.document_converter import DocumentConverter
+import re
 
 class PDF2MindMapper():
     """
@@ -22,7 +24,14 @@ class PDF2MindMapper():
         self.indentSize = 4   # The number of spaces to indent each level. 
         self.currentText = ""
 
-    def openPDF(self):
+    # def convertPDF(self, filePath):
+    #     source = filePath  # PDF path or URL
+    #     converter = DocumentConverter()
+    #     result = converter.convert(source)
+    #     result_dict = result.document.export_to_dict()
+    #     print(json.dumps(result_dict, indent=2))
+
+    def openJSON(self):
             try:
                 with open(self.jsonFilePath, 'r', encoding='utf-8') as f:  # Important: Specify encoding
                     self.data = json.load(f)
@@ -92,6 +101,13 @@ class PDF2MindMapper():
     def printToConsole(self):
         print(self.output)
 
+    def cleanOutput(self):
+        # Normalize the text and remove non-printable characters
+        self.output = re.sub(r'\u25cf ', '', self.output)
+        self.output = re.sub(r'\u25cb ', '', self.output)
+        self.output = re.sub(r'\u25a0 ', '', self.output)
+        return self.output
+
     def saveToFile(self, file_path, indented_text):
         try:
             with open(file_path, "w", encoding="utf-8") as outfile:
@@ -104,7 +120,10 @@ class PDF2MindMapper():
 # Example Usage:
 file_path = "/home/chris/Documents/Udemy/CompTIA-Network/studyguide1-50.json"  # Replace with your file path
 pdf2map = PDF2MindMapper(file_path)
-pdf2map.openPDF()
+# pdf2map.convertPDF("/home/chris/Documents/Udemy/CompTIA-Network/1_DOCLING_CompTIA+Network++(N10-009)+Study+Guide.pdf")
+pdf2map.openJSON()
 pdf2map.process()
+pdf2map.cleanOutput()
 pdf2map.printToConsole()
-print(pdf2map.extractIndentLevels())
+# print(pdf2map.extractIndentLevels())
+# pdf2map.saveToFile("/home/chris/Documents/Udemy/CompTIA-Network/output.txt", pdf2map.output)

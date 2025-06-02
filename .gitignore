@@ -1,3 +1,4 @@
 *.pdf
 output.txt
 CompTIA*.txt
+__pycache__
