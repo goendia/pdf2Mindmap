@@ -79,12 +79,16 @@ class PDF2MindMapper():
                     self.indentLevel = 1
                 case 162:
                     self.indentLevel = 2
-                case 198:
+                case 198 | 198.158:
                     self.indentLevel = 3
                 case 234:
                     self.indentLevel = 4
                 case 270:
                     self.indentLevel = 5
+                case 306 | 306.072:
+                    self.indentLevel = 6
+                case 342:
+                    self.indentLevel = 7
                 case _:
                     self.indentLevel = 0
             # if self.currentLeft > self.previousLeft:
@@ -118,12 +122,13 @@ class PDF2MindMapper():
 
 
 # Example Usage:
-file_path = "/home/chris/Documents/Udemy/CompTIA-Network/studyguide1-50.json"  # Replace with your file path
+# file_path = "/home/chris/Documents/Udemy/CompTIA-Network/studyguide1-50.json"  # Replace with your file path
+file_path = "/home/chris/Documents/Udemy/CompTIA-Network/CompTIANetworkN10-009StudyGuide.json"  # Replace with your file path
 pdf2map = PDF2MindMapper(file_path)
 # pdf2map.convertPDF("/home/chris/Documents/Udemy/CompTIA-Network/1_DOCLING_CompTIA+Network++(N10-009)+Study+Guide.pdf")
 pdf2map.openJSON()
 pdf2map.process()
-pdf2map.cleanOutput()
-pdf2map.printToConsole()
+# pdf2map.cleanOutput()
+# pdf2map.printToConsole()
 # print(pdf2map.extractIndentLevels())
-# pdf2map.saveToFile("/home/chris/Documents/Udemy/CompTIA-Network/output.txt", pdf2map.output)
+pdf2map.saveToFile("/home/chris/Documents/Udemy/CompTIA-Network/CompTIANetworkN10-009StudyGuide.txt", pdf2map.output)
