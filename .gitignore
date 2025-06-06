@@ -1,4 +1,6 @@
 *.pdf
 output.txt
 CompTIA*.txt
+CompTIA*.json
 __pycache__
+*.zip
