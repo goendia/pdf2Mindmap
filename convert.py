@@ -41,7 +41,6 @@ class PDF2MindMapper():
                 return f"Error: Invalid JSON format in {self.jsonFilePath}"
     
     def extractIndentLevels(self):
-        # TODO: Implement this
         listOfIndentLevels = {}
         for element in self.data['texts']:
             currentLeft = element['prov'][0]['bbox']['l']
@@ -51,6 +50,26 @@ class PDF2MindMapper():
                 listOfIndentLevels[currentLeft] = 1
         sortedlistOfIndentLevels = dict(sorted(listOfIndentLevels.items()))
         return sortedlistOfIndentLevels
+
+    def findLikelyListBullets(self, text):
+
+        # Define a regular expression that matches potential bullet characters.
+        bullet_regex = r"[\u2022\u2043\u25e6\u25cf\u25cb\u25aa\u25ab\u25ac\u25a0\u25ad\u2047\u203a\u203b\u203c\u203d\u276f\u2770\u30fb\ufe30\uff08\uff09]"
+        matches = re.findall(bullet_regex, text)
+
+        # Convert the list of matches to a set to remove duplicates.
+        bullets = set(matches)
+
+        unlikely_bullets = {
+            # Add characters here that your analysis shows are commonly
+            # matched but *aren't* actually list bullets in *your* document.
+            # Example:
+            # '\ufe30' # A common bullet point, but might also appear in other contexts
+        }
+
+        filtered_bullets = bullets #- unlikely_bullets
+
+        return filtered_bullets
 
     def extractIndentedText(self):
         # TODO: Implement this
@@ -128,7 +147,8 @@ pdf2map = PDF2MindMapper(file_path)
 # pdf2map.convertPDF("/home/chris/Documents/Udemy/CompTIA-Network/1_DOCLING_CompTIA+Network++(N10-009)+Study+Guide.pdf")
 pdf2map.openJSON()
 pdf2map.process()
+print(pdf2map.findLikelyListBullets(pdf2map.output))
 # pdf2map.cleanOutput()
 # pdf2map.printToConsole()
 # print(pdf2map.extractIndentLevels())
-pdf2map.saveToFile("/home/chris/Documents/Udemy/CompTIA-Network/CompTIANetworkN10-009StudyGuide.txt", pdf2map.output)
+# pdf2map.saveToFile("/home/chris/Documents/Udemy/CompTIA-Network/CompTIANetworkN10-009StudyGuide.txt", pdf2map.output)
