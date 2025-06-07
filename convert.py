@@ -1,6 +1,7 @@
 import json
 # from docling.document_converter import DocumentConverter
 import re
+from operator import itemgetter
 
 class PDF2MindMapper():
     """
@@ -16,12 +17,11 @@ class PDF2MindMapper():
     """
     def __init__(self, jsonFilePath, indentSize=4):
         self.jsonFilePath = jsonFilePath
-        self.indentSize = indentSize
+        self.indentSize = indentSize# The number of spaces to indent each level
         self.data = {}   # The JSON data
         self.output = ""
         self.previousLeft = 0  # Keep track of the previous left coordinate
         self.indentLevel = 0 # The current indentation level
-        self.indentSize = 4   # The number of spaces to indent each level. 
         self.currentText = ""
 
     # def convertPDF(self, filePath):
@@ -40,7 +40,7 @@ class PDF2MindMapper():
             except json.JSONDecodeError:
                 return f"Error: Invalid JSON format in {self.jsonFilePath}"
     
-    def extractIndentLevels(self):
+    def extractIndentLevels(self, sortType="items"):
         listOfIndentLevels = {}
         for element in self.data['texts']:
             currentLeft = element['prov'][0]['bbox']['l']
@@ -48,25 +48,26 @@ class PDF2MindMapper():
                 listOfIndentLevels[currentLeft] += 1
             else:
                 listOfIndentLevels[currentLeft] = 1
-        sortedlistOfIndentLevels = dict(sorted(listOfIndentLevels.items()))
+        if sortType == "items":
+            sortedlistOfIndentLevels = dict(sorted(listOfIndentLevels.items()))
+        elif sortType == "values":
+            sortedlistOfIndentLevels = dict(sorted(listOfIndentLevels.items(), key=itemgetter(1), reverse=True))
+        else:
+            return f"Error: Invalid sortType {sortType}"
         return sortedlistOfIndentLevels
 
     def findLikelyListBullets(self, text):
-
         # Define a regular expression that matches potential bullet characters.
         bullet_regex = r"[\u2022\u2043\u25e6\u25cf\u25cb\u25aa\u25ab\u25ac\u25a0\u25ad\u2047\u203a\u203b\u203c\u203d\u276f\u2770\u30fb\ufe30\uff08\uff09]"
         matches = re.findall(bullet_regex, text)
-
         # Convert the list of matches to a set to remove duplicates.
         bullets = set(matches)
-
         unlikely_bullets = {
             # Add characters here that your analysis shows are commonly
             # matched but *aren't* actually list bullets in *your* document.
             # Example:
             # '\ufe30' # A common bullet point, but might also appear in other contexts
         }
-
         filtered_bullets = bullets #- unlikely_bullets
 
         return filtered_bullets
@@ -131,10 +132,10 @@ class PDF2MindMapper():
         self.output = re.sub(r'\u25a0 ', '', self.output)
         return self.output
 
-    def saveToFile(self, file_path, indented_text):
+    def saveToFile(self, filePath, indentedText):
         try:
-            with open(file_path, "w", encoding="utf-8") as outfile:
-                outfile.write(indented_text)
+            with open(filePath, "w", encoding="utf-8") as outFile:
+                outFile.write(indentedText)
         except:
             print("Error saving file.")
 
@@ -142,13 +143,13 @@ class PDF2MindMapper():
 
 # Example Usage:
 # file_path = "/home/chris/Documents/Udemy/CompTIA-Network/studyguide1-50.json"  # Replace with your file path
-file_path = "/home/chris/Documents/Udemy/CompTIA-Network/CompTIANetworkN10-009StudyGuide.json"  # Replace with your file path
-pdf2map = PDF2MindMapper(file_path)
+filePath = "/home/chris/Documents/Udemy/CompTIA-Network/CompTIANetworkN10-009StudyGuide.json"  # Replace with your file path
+pdf2map = PDF2MindMapper(filePath)
 # pdf2map.convertPDF("/home/chris/Documents/Udemy/CompTIA-Network/1_DOCLING_CompTIA+Network++(N10-009)+Study+Guide.pdf")
 pdf2map.openJSON()
 pdf2map.process()
 print(pdf2map.findLikelyListBullets(pdf2map.output))
 # pdf2map.cleanOutput()
 # pdf2map.printToConsole()
-# print(pdf2map.extractIndentLevels())
+print(pdf2map.extractIndentLevels(sortType="values"))
 # pdf2map.saveToFile("/home/chris/Documents/Udemy/CompTIA-Network/CompTIANetworkN10-009StudyGuide.txt", pdf2map.output)
