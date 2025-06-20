@@ -71,6 +71,28 @@ class PDF2MindMapper():
         filtered_bullets = bullets #- unlikely_bullets
 
         return filtered_bullets
+    
+    def findBulletIndentationLevels(self):
+        # This function uses the likely list bulletts to determine the indentation level of the bullets
+        bulletCharacters = self.findLikelyListBullets(self.output)
+        listOfIndentLevels = {}
+        # Add 1 to each indent level for each instance of the bullet character.
+        # This is a bit tricky because we need to check the first character of each text block.
+        # If it's a bullet character then we add one, otherwise we ignore that text block.
+        for element in self.data['texts']:
+            firstTextSymbol = element['text'][0].strip()
+            currentLeft = element['prov'][0]['bbox']['l']
+            if firstTextSymbol not in bulletCharacters:
+                continue
+            elif firstTextSymbol in bulletCharacters:
+                if firstTextSymbol in listOfIndentLevels and currentLeft in listOfIndentLevels[firstTextSymbol]:
+                    listOfIndentLevels[firstTextSymbol][currentLeft] += 1
+                elif firstTextSymbol in listOfIndentLevels and currentLeft not in listOfIndentLevels[firstTextSymbol]:
+                    listOfIndentLevels[firstTextSymbol].update({currentLeft : 1})
+                else:
+                    listOfIndentLevels[firstTextSymbol] = {currentLeft : 1}
+
+        return listOfIndentLevels
 
     def extractIndentedText(self):
         # TODO: Implement this
@@ -80,6 +102,12 @@ class PDF2MindMapper():
         # Filter unneeded data like page numbers, header data, footing, etc
         return
 
+    def skipItem(self):
+        # Skip empty text items, header and footer, etc
+        if len(self.currentText) == 0 or self.currentText== 'https://www.DionTraining.com' or self.currentText == 'CompTIA Network+ (N10-009) (Study Notes)' or self.currentLeft > 500:
+            return True
+        return False
+
     def process(self):
         text_items = self.data['texts']
 
@@ -87,8 +115,7 @@ class PDF2MindMapper():
             self.currentText = element['text'].strip()
             # Determine indentation level based on left coordinate
             self.currentLeft = element['prov'][0]['bbox']['l']
-            # Skip empty text items and bullet points that are not nested
-            if len(self.currentText) == 0 or self.currentText== 'https://www.DionTraining.com' or self.currentText == 'CompTIA Network+ (N10-009) (Study Notes)' or self.currentLeft > 500:
+            if self.skipItem():
                 continue
 
             # Determine indentation level based on left coordinate
@@ -151,5 +178,6 @@ pdf2map.process()
 print(pdf2map.findLikelyListBullets(pdf2map.output))
 # pdf2map.cleanOutput()
 # pdf2map.printToConsole()
+print(pdf2map.findBulletIndentationLevels())
 print(pdf2map.extractIndentLevels(sortType="values"))
 # pdf2map.saveToFile("/home/chris/Documents/Udemy/CompTIA-Network/CompTIANetworkN10-009StudyGuide.txt", pdf2map.output)
